@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="nav-info">
             <a href="#" class="username">chiemin</a>
-            <a href="/myBookshelf.do" class="bookshelf">||&nbsp;&nbsp;&nbsp;我的书架</a>
+            <a href="myBookshelf.do" class="bookshelf">||&nbsp;&nbsp;&nbsp;我的书架</a>
             <a href="#" class="logout">[ 退 出 ]</a>
         </div> <!-- nav-info -->
         <form action="searchBook.do" method="post">
@@ -27,9 +27,9 @@
             </div><!--  nav-search -->
         </form>
         <ul class="menu">
-            <li><a href="/home.do">首页</a></li>
-            <li><a href="/goBookStore.do">书籍良品</a></li>
-            <li><a href="/goAskBookStore.do">求书区</a></li>
+            <li><a href="home.do">首页</a></li>
+            <li><a href="goBookStore.do">书籍良品</a></li>
+            <li><a href="goAskBookStore.do">求书区</a></li>
             <li><a href="#">服务区</a></li>
         </ul>
     </nav>

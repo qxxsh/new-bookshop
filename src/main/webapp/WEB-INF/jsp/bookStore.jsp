@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="nav-info">
             <a href="#" class="username">${user.getName()}</a>
-            <a href="/myBookshelf.do" class="bookshelf">||&nbsp;&nbsp;&nbsp;我的书架</a>
+            <a href="myBookshelf.do" class="bookshelf">||&nbsp;&nbsp;&nbsp;我的书架</a>
             <a href="#" class="logout">[ 退 出 ]</a>
         </div> <!-- nav-info -->
         <form action="searchBook.do" method="post">
@@ -27,9 +27,9 @@
             </div><!--  nav-search -->
         </form>
         <ul class="menu">
-            <li><a href="/home.do">首页</a></li>
-            <li><a class="active" href="/goBookStore.do">书籍良品</a></li>
-            <li><a href="/goAskBookStore.do">求书区</a></li>
+            <li><a href="home.do">首页</a></li>
+            <li><a class="active" href="goBookStore.do">书籍良品</a></li>
+            <li><a href="goAskBookStore.do">求书区</a></li>
             <li><a href="#">服务区</a></li>
         </ul>
     </nav>
@@ -53,7 +53,7 @@
         <ul class="book-lists">
             <c:forEach items="${books}" var="book" varStatus="bookStatus">
             <li class="book-list">
-                <a href="bookDetail.do?id=${book.getId()}" class="book-pic" target="_blank">
+                <a href="books/${book.getId()}" class="book-pic" target="_blank">
                     <img src="<%=request.getContextPath()%>/img/book-list/article/${book.getBookImage().getId()}.jpg">
                 </a>
                 <a href="#" class="book-info">
