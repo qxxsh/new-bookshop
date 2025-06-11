@@ -215,7 +215,7 @@ const reviewForm = ref({
 const statusOptions = [
   { value: null, label: '全部' },
   { value: 1, label: '待支付' },
-  { value: 2, label: '已支付' },
+  { value: 2, label: '待发货' },
   { value: 3, label: '已发货' },
   { value: 4, label: '已完成' },
   { value: 5, label: '已取消' }
@@ -273,21 +273,22 @@ const checkReviewStatus = async () => {
   }
 }
 
-// 按状态筛选
+// 筛选订单
 const filterByStatus = (status) => {
   currentStatus.value = status
-  pageNum.value = 1
+  pageNum.value = 1 // 重置到第一页
   loadOrders()
 }
 
-// 翻页
-const changePage = (num) => {
-  if (num < 1 || num > totalPages.value) return
-  pageNum.value = num
-  loadOrders()
+// 改变页码
+const changePage = (newPage) => {
+  if (newPage > 0 && newPage <= totalPages.value) {
+    pageNum.value = newPage
+    loadOrders()
+  }
 }
 
-// 支付订单
+// 支付订单 - 打开弹窗
 const payOrder = (order) => {
   currentPayingOrder.value = order
   showPayModal.value = true
@@ -295,98 +296,78 @@ const payOrder = (order) => {
 
 // 确认支付
 const confirmPayment = async () => {
-  if (!selectedPaymentMethod.value) {
-    alert('请选择支付方式')
-    return
-  }
+  if (!currentPayingOrder.value) return
   
   try {
     const res = await axios.put(`/api/order/${currentPayingOrder.value.id}/pay`, null, {
-      params: {
-        paymentMethod: selectedPaymentMethod.value
-      }
+      params: { paymentMethod: selectedPaymentMethod.value }
     })
     
     if (res.data.resultCode === 200) {
       alert('支付成功！')
       closePayModal()
-      loadOrders()
+      loadOrders() // 刷新列表
     } else {
-      alert(res.data.message)
+      alert(res.data.message || '支付失败')
     }
   } catch (error) {
     console.error('支付失败:', error)
-    alert('支付失败')
+    alert('支付操作失败')
   }
-}
-
-// 关闭支付弹窗
-const closePayModal = () => {
-  showPayModal.value = false
-  currentPayingOrder.value = null
-  selectedPaymentMethod.value = 'alipay'
 }
 
 // 取消订单
 const cancelOrder = async (order) => {
-  if (!confirm('确定要取消这个订单吗？')) {
-    return
-  }
-  
+  if (!confirm(`确定要取消订单 ${order.orderNo} 吗？`)) return
+
   try {
     const res = await axios.put(`/api/order/${order.id}/cancel`)
     if (res.data.resultCode === 200) {
       alert('订单已取消')
-      loadOrders()
+      loadOrders() // 刷新列表
     } else {
-      alert(res.data.message)
+      alert(res.data.message || '取消失败')
     }
   } catch (error) {
     console.error('取消订单失败:', error)
-    alert('取消订单失败')
+    alert('操作失败')
   }
 }
 
 // 确认收货
 const confirmOrder = async (order) => {
-  if (!confirm('确定已收到商品吗？')) {
-    return
-  }
-  
+  if (!confirm(`请确认您已收到订单 ${order.orderNo} 的全部商品。`)) return
+
   try {
     const res = await axios.put(`/api/order/${order.id}/confirm`)
     if (res.data.resultCode === 200) {
       alert('确认收货成功！')
-      loadOrders()
+      loadOrders() // 刷新列表
     } else {
-      alert(res.data.message)
+      alert(res.data.message || '确认收货失败')
     }
   } catch (error) {
     console.error('确认收货失败:', error)
-    alert('确认收货失败')
+    alert('操作失败')
   }
+}
+
+// 查看订单详情
+const viewOrder = (order) => {
+  // 假设我们有一个订单详情页，路由为 /order/:id
+  router.push(`/order/${order.id}`)
 }
 
 // 显示评价弹窗
-const showReviewModal = (orderItem) => {
-  currentReviewItem.value = orderItem
-  reviewForm.value = {
-    rating: 0,
-    content: '',
-    isAnonymous: false
-  }
+const showReviewModal = (item) => {
+  currentReviewItem.value = item
+  reviewForm.value = { rating: 0, content: '', isAnonymous: false }
   showReviewModalFlag.value = true
 }
 
-// 关闭评价弹窗
-const closeReviewModal = () => {
-  showReviewModalFlag.value = false
-  currentReviewItem.value = null
-}
-
 // 设置评分
-const setRating = (rating) => {
-  reviewForm.value.rating = rating
+const setRating = (star) => {
+  reviewForm.value.rating = star
 }
 
 // 提交评价
@@ -399,50 +380,57 @@ const submitReview = async () => {
   try {
     const reviewData = {
       orderItemId: currentReviewItem.value.id,
+      bookId: currentReviewItem.value.bookId,
       rating: reviewForm.value.rating,
-      content: reviewForm.value.content,
+      content: reviewForm.value.content || '用户未填写评价。',
       isAnonymous: reviewForm.value.isAnonymous
     }
+    const res = await axios.post('/api/reviews', reviewData)
     
-    const res = await axios.post('/api/review/create', reviewData)
     if (res.data.resultCode === 200) {
       alert('评价成功！')
       closeReviewModal()
-      loadOrders() // 刷新订单列表
+      // 标记为已评价，避免重复评价
+      currentReviewItem.value.reviewed = true
     } else {
-      alert(res.data.message)
+      alert(res.data.message || '评价提交失败')
     }
   } catch (error) {
     console.error('评价失败:', error)
-    alert('评价失败')
+    alert('评价操作失败')
   }
 }
 
-// 查看订单详情
-const viewOrder = (order) => {
-  router.push(`/orders/${order.id}`)
+// 关闭支付弹窗
+const closePayModal = () => {
+  showPayModal.value = false
+  currentPayingOrder.value = null
+}
+
+const closeReviewModal = () => {
+  showReviewModalFlag.value = false
+  currentReviewItem.value = null
 }
 
 // 格式化日期
-const formatDate = (dateStr) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleString()
 }
 
 // 获取状态样式类
 const getStatusClass = (status) => {
-  switch (status) {
-    case 1: return 'status-pending'
-    case 2: return 'status-paid'
-    case 3: return 'status-shipped'
-    case 4: return 'status-completed'
-    case 5: return 'status-cancelled'
-    default: return ''
+  const statusClasses = {
+    1: 'status-pending',
+    2: 'status-paid',
+    3: 'status-shipped',
+    4: 'status-completed',
+    5: 'status-cancelled'
   }
+  return statusClasses[status] || ''
 }
 
-// 图片错误处理
+// 图片加载失败处理
 const handleImageError = (event) => {
   event.target.src = '/default-book.png'
 }
@@ -453,12 +441,24 @@ const handleImageError = (event) => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* 筛选按钮 */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
 .order-filter {
   margin-bottom: 20px;
   text-align: center;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: white;
 }
 
 .filter-btn {
@@ -485,11 +485,12 @@ const handleImageError = (event) => {
 
 /* 订单卡片 */
 .order-card {
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   background: white;
   overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .order-header {
@@ -498,18 +499,20 @@ const handleImageError = (event) => {
   align-items: center;
   padding: 15px 20px;
   background-color: #f8f9fa;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 8px 8px 0 0;
 }
 
 .order-info {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  font-size: 14px;
+  color: #666;
 }
 
 .order-no {
-  font-weight: bold;
-  color: #333;
+  margin-right: 20px;
 }
 
 .order-time {
@@ -518,27 +521,27 @@ const handleImageError = (event) => {
 }
 
 .order-status {
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 5px 10px;
+  border-radius: 5px;
   font-size: 14px;
   font-weight: bold;
 }
 
-.status-pending { background-color: #fff3cd; color: #856404; }
-.status-paid { background-color: #d4edda; color: #155724; }
-.status-shipped { background-color: #cce5ff; color: #004085; }
-.status-completed { background-color: #d1ecf1; color: #0c5460; }
-.status-cancelled { background-color: #f8d7da; color: #721c24; }
+.status-pending { color: #ff9800; background-color: #fff5e6; }
+.status-paid { color: #4caf50; background-color: #e8f5e9; }
+.status-shipped { color: #2196f3; background-color: #e3f2fd; }
+.status-completed { color: #9e9e9e; background-color: #f5f5f5; }
+.status-cancelled { color: #f44336; background-color: #ffebee; }
 
 /* 订单商品 */
 .order-items {
-  padding: 15px 20px;
+  padding: 10px 0;
 }
 
 .order-item {
   display: flex;
   align-items: center;
-  padding: 10px 0;
+  padding: 15px 20px;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -547,7 +550,7 @@ const handleImageError = (event) => {
 }
 
 .item-image {
-  width: 60px;
+  width: 80px;
   height: 80px;
   margin-right: 15px;
 }
@@ -560,30 +563,30 @@ const handleImageError = (event) => {
 }
 
 .item-info {
-  flex: 1;
+  flex-grow: 1;
 }
 
 .item-info h4 {
   margin: 0 0 5px 0;
   font-size: 16px;
-  color: #333;
 }
 
 .item-info p {
-  margin: 2px 0;
-  color: #666;
+  margin: 0;
   font-size: 14px;
+  color: #666;
 }
 
 .item-price {
-  color: #ff4444;
+  font-size: 16px;
   font-weight: bold;
-  margin-right: 15px;
+  min-width: 100px;
+  text-align: right;
 }
 
 .item-actions {
-  width: 80px;
-  text-align: center;
+  min-width: 100px;
+  text-align: right;
 }
 
 .btn-review {
@@ -596,7 +599,7 @@ const handleImageError = (event) => {
 }
 
 .reviewed-text {
-  color: #28a745;
+  color: #999;
   font-size: 14px;
 }
 
@@ -607,17 +610,17 @@ const handleImageError = (event) => {
   align-items: center;
   padding: 15px 20px;
   background-color: #f8f9fa;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e0e0e0;
 }
 
 .order-total {
-  font-size: 16px;
+  margin-bottom: 15px;
 }
 
-.total-amount {
-  color: #ff4444;
-  font-weight: bold;
+.order-total .total-amount {
   font-size: 18px;
+  font-weight: bold;
+  color: #e53935;
 }
 
 .order-actions {
@@ -689,29 +692,26 @@ const handleImageError = (event) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 30px;
-  gap: 15px;
+  margin-top: 20px;
 }
 
 .page-btn {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
   border-radius: 4px;
-}
-
-.page-btn:hover:not(:disabled) {
-  background-color: #f8f9fa;
+  cursor: pointer;
 }
 
 .page-btn:disabled {
-  opacity: 0.5;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
 .page-info {
-  font-weight: bold;
+  margin: 0 15px;
+  font-size: 16px;
 }
 
 /* 弹窗样式 */
@@ -730,14 +730,15 @@ const handleImageError = (event) => {
 
 .modal-content {
   background: white;
-  padding: 20px;
+  padding: 30px;
   border-radius: 8px;
-  width: 400px;
-  max-width: 90vw;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 400px;
 }
 
 .modal-content h3 {
-  margin: 0 0 20px 0;
+  margin-top: 0;
   text-align: center;
 }
 
@@ -750,13 +751,13 @@ const handleImageError = (event) => {
   display: block;
   padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 5px;
   margin-bottom: 10px;
   cursor: pointer;
 }
 
 .payment-methods label:hover {
-  background-color: #f8f9fa;
+  background-color: #f5f5f5;
 }
 
 .payment-methods input[type="radio"] {
@@ -765,7 +766,7 @@ const handleImageError = (event) => {
 
 /* 评价弹窗 */
 .review-modal {
-  width: 500px;
+  max-width: 500px;
 }
 
 .review-form {
@@ -796,19 +797,16 @@ const handleImageError = (event) => {
 }
 
 .star-rating {
-  display: flex;
-  gap: 5px;
+  display: inline-block;
 }
 
-.star {
-  font-size: 24px;
-  color: #ddd;
+.star-rating .star {
   cursor: pointer;
-  transition: color 0.2s;
+  font-size: 24px;
+  color: #ccc;
 }
 
-.star.active,
-.star:hover {
+.star-rating .star.active {
   color: #ffc107;
 }
 
@@ -817,7 +815,6 @@ const handleImageError = (event) => {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  resize: vertical;
 }
 
 .anonymous-section label {
@@ -828,8 +825,16 @@ const handleImageError = (event) => {
 }
 
 .modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  margin-top: 20px;
+  text-align: right;
+}
+
+.modal-actions button {
+  margin-left: 10px;
+}
+
+.status-text {
+  color: #555;
+  font-weight: bold;
 }
 </style> 

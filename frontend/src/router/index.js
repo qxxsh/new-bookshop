@@ -11,6 +11,7 @@ import EditBook from '../views/EditBook.vue'
 import Cart from '../views/Cart.vue'
 import OrderConfirm from '../views/OrderConfirm.vue'
 import OrderList from '../views/OrderList.vue'
+import OrderDetail from '../views/OrderDetail.vue'
 import ProfileEdit from '../views/ProfileEdit.vue'
 import Register from '../views/Register.vue'
 
@@ -28,7 +29,7 @@ const routes = [
   { path: '/cart', component: Cart },
   { path: '/order/confirm', component: OrderConfirm },
   { path: '/orders', component: OrderList },
-  { path: '/orders/:id', component: OrderList },
+  { path: '/orders/:id', component: OrderDetail },
   { path: '/profile/edit', component: ProfileEdit },
   { path: '/', redirect: '/login' }
 ]
