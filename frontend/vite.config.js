@@ -4,7 +4,6 @@ import vue from '@vitejs/plugin-vue'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  // 确保图片文件被视为静态资源而不是模块
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
   server: {
     proxy: {
@@ -15,7 +14,6 @@ export default defineConfig({
       }
     }
   },
-  // 构建时确保图片正确处理
   build: {
     assetsDir: 'assets',
     rollupOptions: {

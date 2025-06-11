@@ -213,29 +213,22 @@ const keyword = ref('')
 
 async function fetchBooks() {
   try {
-    console.log('正在获取求书数据...')
     const params = {
       pageNum: pageNum.value,
       pageSize: pageSize.value,
       keyword: keyword.value,
       bookType: 0
     }
-    console.log('请求参数:', params)
     const res = await axios.get('/api/book/list', { params })
-    console.log('求书数据响应:', res.data)
     
     if (res.data.code === 200) {
       const page = res.data.data
       books.value = page.records || []
       totalPages.value = Math.ceil((page.total || 0) / pageSize.value)
-      console.log('求书数据获取成功:', books.value)
-      console.log('总页数:', totalPages.value)
     } else {
-      console.error('求书数据获取失败:', res.data.message)
       books.value = []
     }
   } catch (error) {
-    console.error('求书接口调用失败:', error)
     books.value = []
   }
 }

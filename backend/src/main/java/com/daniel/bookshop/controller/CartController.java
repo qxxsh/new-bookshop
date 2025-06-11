@@ -36,15 +36,11 @@ public class CartController {
         
         User user = (User) session.getAttribute(Constants.SESSION_USER);
         if (user == null) {
-            System.out.println("用户未登录");
             return Response.error("请先登录");
         }
         
-        System.out.println("当前用户ID: " + user.getId());
-        System.out.println("当前用户姓名: " + user.getName());
         
         boolean success = cartService.addToCart(user.getId(), bookId, quantity);
-        System.out.println("添加购物车结果: " + success);
         
         if (success) {
             return Response.success();
@@ -152,12 +148,9 @@ public class CartController {
                 return Response.error("请先登录");
             }
             
-            System.out.println("=== 购物车调试接口 ===");
-            System.out.println("用户ID: " + user.getId());
-            System.out.println("用户名: " + user.getName());
+
             
             List<Cart> cartList = cartService.getCartList(user.getId());
-            System.out.println("购物车记录数: " + cartList.size());
             
             java.util.Map<String, Object> debugInfo = new java.util.HashMap<>();
             debugInfo.put("userId", user.getId());

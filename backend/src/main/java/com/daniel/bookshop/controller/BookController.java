@@ -30,13 +30,6 @@ public class BookController {
             @RequestParam(required = false) Integer bookType,
             @RequestParam(required = false) Integer userId) {
         
-        System.out.println("=== Book列表查询调试信息 ===");
-        System.out.println("pageNum: " + pageNum);
-        System.out.println("pageSize: " + pageSize);
-        System.out.println("keyword: " + keyword);
-        System.out.println("categoryId: " + categoryId);
-        System.out.println("bookType: " + bookType);
-        System.out.println("userId: " + userId);
         
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
         if (keyword != null && !keyword.isEmpty()) {
@@ -61,8 +54,6 @@ public class BookController {
         
         Page<Book> page = bookService.page(new Page<>(pageNum, pageSize), queryWrapper);
         
-        System.out.println("查询结果总数: " + page.getTotal());
-        System.out.println("当前页记录数: " + page.getRecords().size());
         
         // 为每本书加载关联的BookImage数据
         for (Book book : page.getRecords()) {
