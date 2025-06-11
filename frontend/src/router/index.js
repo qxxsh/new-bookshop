@@ -12,9 +12,11 @@ import Cart from '../views/Cart.vue'
 import OrderConfirm from '../views/OrderConfirm.vue'
 import OrderList from '../views/OrderList.vue'
 import ProfileEdit from '../views/ProfileEdit.vue'
+import Register from '../views/Register.vue'
 
 const routes = [
   { path: '/login', component: Login },
+  { path: '/register', component: Register },
   { path: '/home', component: Home },
   { path: '/bookstore', component: BookStore },
   { path: '/askBookStore', component: AskBookStore },

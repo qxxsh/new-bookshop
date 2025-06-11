@@ -16,26 +16,6 @@
           </div>
           <h1 class="login-title">校园二手书交易平台</h1>
           <p class="login-subtitle">欢迎回来，请登录您的账户</p>
-          
-          <!-- 测试账户提示 -->
-          <div class="test-accounts">
-            <h4>📋 测试账户</h4>
-            <div class="account-list">
-              <div class="account-item" @click="fillAccount('2300822', '675844')">
-                <span class="student-id">2300822</span>
-                <span class="name">刘一帆</span>
-              </div>
-              <div class="account-item" @click="fillAccount('2300823', '549256')">
-                <span class="student-id">2300823</span>
-                <span class="name">于文轩</span>
-              </div>
-              <div class="account-item" @click="fillAccount('2300824', '123456')">
-                <span class="student-id">2300824</span>
-                <span class="name">邱子昂</span>
-              </div>
-            </div>
-            <p class="tip">💡 点击任意账户快速填入</p>
-          </div>
         </div>
 
         <form @submit.prevent="handleLogin" class="login-form">
@@ -44,7 +24,7 @@
               v-model="studentid" 
               type="text" 
               class="form-input" 
-              placeholder="👤 请输入学号"
+              placeholder=" 请输入学号"
               :class="{ 'error': errorInfo && !studentid }"
             />
           </div>
@@ -54,7 +34,7 @@
               v-model="password" 
               type="password" 
               class="form-input" 
-              placeholder="🔒 请输入密码"
+              placeholder=" 请输入密码"
               :class="{ 'error': errorInfo && !password }"
             />
           </div>
@@ -143,13 +123,7 @@ const handleLogin = async () => {
 }
 
 const handleRegister = () => {
-  // 暂时显示提示信息，提醒用户注册功能
-  alert('注册功能正在开发中！\n\n如需注册账户，请联系管理员或稍后再试。\n\n测试账号：可以使用任意学号和密码进行测试。')
-}
-
-const fillAccount = (studentId, pwd) => {
-  studentid.value = studentId
-  password.value = pwd
+  router.push('/register');
 }
 </script>
 
@@ -249,36 +223,41 @@ const fillAccount = (studentId, pwd) => {
 }
 
 .logo-container {
-  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .logo {
-  font-size: 48px;
-  display: inline-block;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
 .login-title {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #2d3748;
-  margin: 0 0 8px 0;
+  margin: 0 0 10px;
 }
 
 .login-subtitle {
-  font-size: 16px;
-  color: #718096;
-  margin: 0 0 20px 0;
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
 }
 
 .login-form {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .input-group {
@@ -437,20 +416,21 @@ const fillAccount = (studentId, pwd) => {
 }
 
 .error-icon {
-  font-size: 16px;
+  margin-right: 8px;
+  font-style: normal;
 }
 
 .login-footer {
   text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #718096;
+  margin-top: 30px;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .register-link {
   color: #667eea;
+  font-weight: 600;
   text-decoration: none;
-  font-weight: 500;
   transition: color 0.3s ease;
 }
 
@@ -460,80 +440,11 @@ const fillAccount = (studentId, pwd) => {
 
 /* 响应式设计 */
 @media (max-width: 480px) {
-  .login-container {
-    padding: 15px;
-  }
-  
   .login-card {
-    padding: 30px 25px;
+    padding: 30px;
   }
-  
   .login-title {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
-  
-  .form-input {
-    padding: 12px 12px 12px 45px;
-  }
-  
-  .login-button {
-    padding: 12px;
-  }
-}
-
-.test-accounts {
-  background: rgba(102, 126, 234, 0.05);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 20px;
-}
-
-.test-accounts h4 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
-  color: #4a5568;
-  font-weight: 600;
-}
-
-.account-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.account-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 13px;
-}
-
-.account-item:hover {
-  background: rgba(102, 126, 234, 0.1);
-  border-color: #667eea;
-  transform: translateY(-1px);
-}
-
-.student-id {
-  font-weight: 600;
-  color: #667eea;
-}
-
-.name {
-  color: #4a5568;
-}
-
-.tip {
-  margin: 10px 0 0 0;
-  font-size: 12px;
-  color: #718096;
-  text-align: center;
 }
 </style> 
